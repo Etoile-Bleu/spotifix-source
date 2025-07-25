@@ -383,7 +383,7 @@
     <string name="other">Autre</string>
     <string name="accounts">Comptes</string>
     <string name="credit_matheo">Crédit</string>
-    <string name="credit_matheo_summary">Cette application a été corrigée et traduite en français par Mathéo Delbarre</string>
+    <string name="credit_matheo_summary">Cette marche application a été corrigée et traduite en français par Mathéo Delbarre</string>
     
     <!-- Messages de mise à jour personnalisés -->
     <string name="matheo_update_available">🎉 Mathéo Delbarre a publié une nouvelle mise à jour !</string>
