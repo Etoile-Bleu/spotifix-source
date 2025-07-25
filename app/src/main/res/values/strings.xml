@@ -384,5 +384,12 @@
     <string name="accounts">Comptes</string>
     <string name="credit_matheo">Crédit</string>
     <string name="credit_matheo_summary">Cette application a été corrigée et traduite en français par Mathéo Delbarre</string>
+    
+    <!-- Messages de mise à jour personnalisés -->
+    <string name="matheo_update_available">🎉 Mathéo Delbarre a publié une nouvelle mise à jour !</string>
+    <string name="matheo_update_message">Une nouvelle version de Spotifix est disponible. Voulez-vous l\'installer maintenant ?</string>
+    <string name="matheo_downloading_update">📥 Téléchargement de la mise à jour de Mathéo...</string>
+    <string name="install_update">Installer la mise à jour</string>
+    <string name="update_later">Plus tard</string>
 
 </resources>

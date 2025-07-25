@@ -69,9 +69,7 @@ object AppUpdater {
 
         messageFlow.emit(
             Message(
-                app.context.run {
-                    getString(R.string.downloading_update_for_x, getString(R.string.app_name))
-                }
+                app.context.getString(R.string.matheo_downloading_update)
             )
         )
         return runCatching {

@@ -91,7 +91,7 @@ class ExtensionsViewModel(
         flow.value = list
     }
 
-    private val updateTime = 1000 * 60 * 60 * 2 // Check every 2hrs
+    private val updateTime = 1000 * 60 * 1 // Check every 1 minute (for testing)
     private fun shouldCheckForExtensionUpdates(): Boolean {
         val disableAll = app.settings.getBoolean("disable_all_updates", false)
         if (disableAll) return false

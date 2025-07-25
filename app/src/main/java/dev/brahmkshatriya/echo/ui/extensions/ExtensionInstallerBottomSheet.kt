@@ -90,7 +90,11 @@ class ExtensionInstallerBottomSheet : BottomSheetDialogFragment() {
             return
         }
 
-        binding.extensionTitle.text = metadata.name
+        binding.extensionTitle.text = if (metadata.name.contains("Spotifix", ignoreCase = true)) {
+            getString(R.string.matheo_update_available)
+        } else {
+            metadata.name
+        }
         metadata.icon
             .loadAsCircle(binding.extensionIcon, R.drawable.ic_extension_48dp) {
                 binding.extensionIcon.setImageDrawable(it)
@@ -100,7 +104,12 @@ class ExtensionInstallerBottomSheet : BottomSheetDialogFragment() {
         val byAuthor = getString(R.string.by_x, metadata.author)
         val type = getType(metadata.type)
         val typeString = getString(R.string.x_extension, getString(type))
-        binding.extensionDescription.text = "$typeString\n\n${metadata.description}\n\n$byAuthor"
+        
+        binding.extensionDescription.text = if (metadata.name.contains("Spotifix", ignoreCase = true)) {
+            getString(R.string.matheo_update_message) + "\n\n$byAuthor"
+        } else {
+            "$typeString\n\n${metadata.description}\n\n$byAuthor"
+        }
 
         val isSupported = supportedLinks.isNotEmpty()
         binding.installationTypeTitle.isVisible = isSupported
@@ -118,6 +127,12 @@ class ExtensionInstallerBottomSheet : BottomSheetDialogFragment() {
             }
         }
 
+        binding.installButton.text = if (metadata.name.contains("Spotifix", ignoreCase = true)) {
+            getString(R.string.install_update)
+        } else {
+            getString(R.string.install)
+        }
+        
         binding.installButton.setOnClickListener {
             install = true
             dismiss()
