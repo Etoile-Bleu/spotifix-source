@@ -28,6 +28,6 @@ echo.
 echo ✅ Tag v%VERSION% cree et pousse!
 echo.
 echo La pipeline stable va se declencher automatiquement.
-echo Verifie ici: https://github.com/Etoile-Bleu/spotify-release/actions
+echo Verifie ici: https://github.com/Etoile-Bleu/spotifix-source/actions
 echo.
 pause
