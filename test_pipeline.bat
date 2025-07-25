@@ -7,16 +7,18 @@ echo.
 echo Que veux-tu tester ?
 echo [1] Nightly build (push sur master)
 echo [2] Stable release (creation d'un tag)
-echo [3] Voir l'etat de la pipeline
-echo [4] Quitter
+echo [3] Release rapide (auto-increment patch)
+echo [4] Voir l'etat de la pipeline
+echo [5] Quitter
 echo.
 
-set /p CHOICE="Choix (1-4): "
+set /p CHOICE="Choix (1-5): "
 
 if "%CHOICE%"=="1" goto TEST_NIGHTLY
 if "%CHOICE%"=="2" goto TEST_STABLE
-if "%CHOICE%"=="3" goto CHECK_PIPELINE
-if "%CHOICE%"=="4" goto END
+if "%CHOICE%"=="3" goto QUICK_RELEASE
+if "%CHOICE%"=="4" goto CHECK_PIPELINE
+if "%CHOICE%"=="5" goto END
 
 echo ❌ Choix invalide
 pause
@@ -60,6 +62,12 @@ if /i not "%CONFIRM%"=="y" (
 )
 
 call create_tag.bat
+goto END
+
+:QUICK_RELEASE
+echo.
+echo ⚡ Release rapide (auto-increment patch)...
+call quick_release.bat
 goto END
 
 :CHECK_PIPELINE
