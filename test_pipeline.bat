@@ -70,7 +70,7 @@ echo 🔗 GitHub Actions: https://github.com/Etoile-Bleu/spotifix-source/actions
 echo 🔗 Releases: https://github.com/Etoile-Bleu/spotifix-source/releases
 echo.
 echo ⏳ Les builds prennent environ 5-10 minutes
-echo 📱 Tu recevras une notification Discord/Telegram quand c'est pret
+echo 📱 Verifie GitHub Actions pour voir le progres
 echo.
 pause
 goto END

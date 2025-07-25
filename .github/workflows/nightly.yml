@@ -44,30 +44,3 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: app/build/outputs/apk/nightly/app-nightly.apk
-
-      - name: Upload APK to Discord
-        shell: bash
-        env:
-          ROLE: ${{ secrets.DISCORD_PING_ROLE_ID }}
-          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        run: |
-          message=$(echo "<@&${{ env.ROLE }}> **${{ env.VERSION }}**\n${{ env.COMMIT }}")
-          curl -F "payload_json={\"content\":\"${message}\"}" \
-          -F "spotify_nightly=@app/build/${{ env.VERSION }}.apk" \
-          ${{ env.WEBHOOK }}
-
-      - name: Upload APK to Telegram
-        shell: bash
-        env:
-          BOT_ID: ${{ secrets.TELEGRAM_BOT_ID }}
-          CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
-          THREAD_ID: ${{ secrets.TELEGRAM_THREAD_ID }}
-        run: |
-          regex='s/[\_\*\[\]\(\)\~\`\>\#\+\-\=\|\{\}\.\!]/\\&/g'
-          message=$(printf "*Nightly Release*\n${{ env.COMMIT }}" | sed -E "$regex")
-          curl -F "chat_id=${{ env.CHANNEL_ID }}" \
-          -F "message_thread_id=${{ env.THREAD_ID }}" \
-          -F "document=@app/build/${{ env.VERSION }}.apk" \
-          -F "caption=${message}" \
-          -F "parse_mode=MarkdownV2" \
-          https://api.telegram.org/bot${{ env.BOT_ID }}/sendDocument
