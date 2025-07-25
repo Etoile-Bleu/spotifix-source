@@ -3,7 +3,7 @@ name: nightly
 on:
   push:
     branches:
-      - main
+      - master
   workflow_dispatch: { }
 
 jobs:
@@ -36,7 +36,7 @@ jobs:
           ./gradlew assembleNightly \
           -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/signing-key.jks \
           -Pandroid.injected.signing.store.password=${{ secrets.PASSWORD }} \
-          -Pandroid.injected.signing.key.alias=key0 \
+          -Pandroid.injected.signing.key.alias=spotify-key \
           -Pandroid.injected.signing.key.password=${{ secrets.PASSWORD }}
           cp app/build/outputs/apk/nightly/app-nightly.apk app/build/${{ env.VERSION }}.apk
 
@@ -53,7 +53,7 @@ jobs:
         run: |
           message=$(echo "<@&${{ env.ROLE }}> **${{ env.VERSION }}**\n${{ env.COMMIT }}")
           curl -F "payload_json={\"content\":\"${message}\"}" \
-          -F "echo_beta=@app/build/${{ env.VERSION }}.apk" \
+          -F "spotify_nightly=@app/build/${{ env.VERSION }}.apk" \
           ${{ env.WEBHOOK }}
 
       - name: Upload APK to Telegram

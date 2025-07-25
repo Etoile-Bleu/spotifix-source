@@ -1,6 +1,6 @@
 ﻿<resources>
     <string name="app_name" translatable="false">Spotifix</string>
-    <string name="app_github_repo" translatable="false">Etoile-Bleu/spotifix-releases</string>
+    <string name="app_github_repo" translatable="false">Etoile-Bleu/spotify-release</string>
     <string name="okay">D\'accord</string>
     <string name="cancel">Annuler</string>
     <string name="back">Retour</string>

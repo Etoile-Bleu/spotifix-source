@@ -11,3 +11,38 @@ local.properties
 
 # Google Services (ex. APIs, Firebase)
 app/google-services.json
+
+# SPOTIFIX SPECIFIC - FICHIERS SENSIBLES
+# Keystores et certificats - ULTRA IMPORTANT !
+*.jks
+*.keystore
+*.p12
+*.p8
+*.cer
+*.crt
+*.pem
+keystore-b64.txt
+spotify-keystore.*
+signing-key.*
+
+# APKs compilés localement  
+*.apk
+*.eapk
+app-debug.apk
+app-release.apk
+app-nightly.apk
+app-stable.apk
+
+# Fichiers temporaires des scripts
+*.tmp
+temp_*
+
+# Logs de compilation
+compilation.log
+build.log
+*.log
+
+# Cache et builds
+build/
+*/build/
+.gradle/
