@@ -91,9 +91,18 @@ class ExtensionParser(
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) PackageManager.GET_SIGNING_CERTIFICATES else 0
 
         const val FEATURE = "dev.brahmkshatriya.echo."
+        const val LEGACY_FEATURE = "dev.brahmkshatriya.echo."
+        
         private fun Array<FeatureInfo>.toExtensionType(): ExtensionType {
-            val feature = first { it.name.startsWith(FEATURE) }
-            val type = feature.name.substringAfter(FEATURE)
+            val feature = firstOrNull { it.name.startsWith(FEATURE) }
+                ?: firstOrNull { it.name.startsWith(LEGACY_FEATURE) }
+                ?: throw NoSuchElementException("No supported extension feature found")
+                
+            val type = when {
+                feature.name.startsWith(FEATURE) -> feature.name.substringAfter(FEATURE)
+                feature.name.startsWith(LEGACY_FEATURE) -> feature.name.substringAfter(LEGACY_FEATURE)
+                else -> throw NoSuchElementException("Unsupported feature: ${feature.name}")
+            }
             return ExtensionType.entries.first { it.feature == type }
         }
 

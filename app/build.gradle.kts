@@ -13,11 +13,11 @@ val gitCount = 100
 val version = "2.1.$gitCount"
 
 android {
-    namespace = "dev.brahmkshatriya.spotifix"
+    namespace = "dev.brahmkshatriya.echo"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "dev.brahmkshatriya.spotifix"
+        applicationId = "dev.weier.spotifix"
         minSdk = 24
         targetSdk = 35
         versionCode = gitCount

@@ -8,3 +8,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Google Services (ex. APIs, Firebase)
+app/google-services.json

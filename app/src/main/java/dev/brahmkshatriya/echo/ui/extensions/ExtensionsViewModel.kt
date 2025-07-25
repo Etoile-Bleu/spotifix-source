@@ -110,11 +110,7 @@ class ExtensionsViewModel(
         activity.saveToCache("last_update_check", System.currentTimeMillis())
         activity.cleanupTempApks()
         message(app.context.getString(R.string.checking_for_extension_updates))
-        
-        // Skip app update check if all updates are disabled
-        val disableAll = app.settings.getBoolean("disable_all_updates", false)
-        val appApk = if (!disableAll || force) updateApp(app) else null
-        
+        val appApk = updateApp(app)
         runCatching {
             if (appApk != null) {
                 activity.saveToCache("last_update_check", 0)

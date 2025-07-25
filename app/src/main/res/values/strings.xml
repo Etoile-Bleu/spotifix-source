@@ -1,6 +1,6 @@
 ﻿<resources>
     <string name="app_name" translatable="false">Spotifix</string>
-    <string name="app_github_repo" translatable="false">votre_nom_utilisateur/spotifix-releases</string>
+    <string name="app_github_repo" translatable="false">Etoile-Bleu/spotifix-releases</string>
     <string name="okay">D\'accord</string>
     <string name="cancel">Annuler</string>
     <string name="back">Retour</string>
@@ -35,7 +35,7 @@
     <string name="show_tabs">Afficher les onglets</string>
     <string name="show_tab_summary">affichera les onglets des extensions comme catégorie</string>
     <string name="unified_liked_playlist_summary">Vos titres aimés de diverses extensions</string>
-    <string name="n_items">%1$d Éléments</string>
+    <string name="n_items">%1$d éléments</string>
     <string name="playlist_liked">Aimé</string>
     <string name="playlist_liked_desc">Vos titres aimés</string>
     <string name="unknown">Inconnu</string>
@@ -56,7 +56,7 @@
     <string name="cancel_all">Annuler tout</string>
     <string name="download_progress">Progression du téléchargement</string>
     <string name="downloads">Téléchargements</string>
-    <string name="x_items">%1$d Éléments</string>
+    <string name="x_items">%1$d éléments</string>
     <string name="downloaded_x">%1$s téléchargé</string>
 
     <string name="logout_and_login">Se déconnecter et se connecter</string>
@@ -158,7 +158,7 @@
     <string name="link">Lien</string>
     <string name="link_or_code">Lien ou code</string>
     <string name="list_is_empty">La liste est vide</string>
-    <string name="extension_installed">%1$s (Installé)</string>
+    <string name="extension_installed">%1$s (Installée)</string>
     <string name="add_extensions">Ajouter des extensions</string>
     <string name="invalid_extension_list">Liste d\'extensions invalide</string>
     <string name="checking_for_extension_updates">Vérification des mises à jour d\'extensions</string>
@@ -208,7 +208,7 @@
     <string name="x_extension">Extension %1$s</string>
     <string name="enabled">Activé</string>
     <string name="disabled">Désactivé</string>
-    <string name="error_updating_extension">Erreur lors de la mise à jour</string>
+    <string name="error_updating_extension">Erreur lors de la mise â jour</string>
 
     <string name="no_user_found">Aucun utilisateur trouvé</string>
     <string name="select_x_account">Sélectionner le compte %1$s</string>
@@ -356,7 +356,7 @@
     <string name="x_created">%1$s créé</string>
     <string name="deleting_x">Suppression de %1$s</string>
     <string name="deleted_x">%1$s supprimé</string>
-    <string name="loading_x">Chargement de %1s</string>
+    <string name="loading_x">Chargement de %1$s</string>
     <string name="saving_x">Enregistrement de %1$s</string>
     <string name="saved_to_x">Enregistré dans %1$s</string>
     <string name="saved_to_playlists">Enregistré dans les listes de lecture</string>
@@ -368,8 +368,8 @@
     <string name="no_download_extension">Aucune extension de téléchargement trouvée, utilisez le code \"spotifixdown\" pour l\'obtenir.</string>
     <string name="nothing_to_download_in_x">Rien à télécharger dans %1$s</string>
     <string name="download_started">Téléchargement commencé</string>
-    <string name="merging_x">Fusion de %1$s</string>
-    <string name="tagging_x">Étiquetage de %1$s</string>
+    <string name="merging_x">fusion de %1$s</string>
+    <string name="tagging_x">étiquetage de %1$s</string>
 
     <string name="apply_player_color_to_app">Appliquer la couleur du lecteur à toute l\'application</string>
     <string name="apply_player_color_to_app_summary">ALERTE LAG !!!</string>

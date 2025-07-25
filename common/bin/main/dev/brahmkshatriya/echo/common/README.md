@@ -32,15 +32,15 @@ Currently, the common package is JVM only. The app recognizes an App or an `apk`
 To determine what type of extension it is, the app looks for the following feature in the manifest file:
 - For Music Extension:
   ```xml
-  <uses-feature android:name="dev.brahmkshatriya.echo.music"/>
+  <uses-feature android:name="dev.weier.spotifix.music"/>
   ```
 - For Lyrics Extension:
   ```xml
-  <uses-feature android:name="dev.brahmkshatriya.echo.lyrics"/>
+  <uses-feature android:name="dev.weier.spotifix.lyrics"/>
   ```
 - For Tracker Extension:
   ```xml
-  <uses-feature android:name="dev.brahmkshatriya.echo.trackers"/>
+  <uses-feature android:name="dev.weier.spotifix.trackers"/>
   ```
 
 There are 2 ways the app can import an extension:

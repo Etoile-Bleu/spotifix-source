@@ -1,5 +1,5 @@
 -dontobfuscate
--keep,allowoptimization class dev.brahmkshatriya.echo.common.** { public protected *; }
+-keep,allowoptimization class dev.weier.spotifix.common.** { public protected *; }
 -keep,allowoptimization class kotlin.** { public protected *; }
 -keep,allowoptimization class kotlinx.coroutines.** { public protected *; }
 -keep,allowoptimization class kotlinx.serialization.** { public protected *; }

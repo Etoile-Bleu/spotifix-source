@@ -57,13 +57,7 @@ class MainActivity : AppCompatActivity() {
         setupPlayerBehavior(uiViewModel, binding.playerFragmentContainer)
         setupExceptionHandler(setupSnackBar(uiViewModel, binding.root))
         checkAppPermissions { extensionLoader.setPermGranted() }
-        
-        // Only configure updates if not disabled
-        val disableAll = getSettings().getBoolean("disable_all_updates", false)
-        if (!disableAll) {
-            configureExtensionsUpdater()
-        }
-        
+        configureExtensionsUpdater()
         supportFragmentManager.commit {
             if (savedInstanceState != null) return@commit
             add<MainFragment>(R.id.navHostFragment, "main")

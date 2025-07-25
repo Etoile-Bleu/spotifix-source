@@ -8,7 +8,7 @@ import dev.brahmkshatriya.echo.utils.Serializer.toData
 import kotlinx.serialization.Serializable
 import java.io.File
 
-@Entity
+@Entity(tableName = "download_entity")
 @Serializable
 data class DownloadEntity(
     @PrimaryKey(true)

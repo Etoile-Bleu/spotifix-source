@@ -19,13 +19,16 @@ class DexLoader(
 ) {
 
     private val preservedPackages = metadata.preservedPackages
+    
     override fun loadClass(name: String?, resolve: Boolean): Class<*> {
-        if (name != null && preservedPackages.any { name.startsWith(it) }) {
-            val loadedClass = classMap[name]?.get()
-            if (loadedClass != null) return loadedClass
-            val clazz = super.loadClass(name, resolve)
-            classMap[name] = WeakReference(clazz)
-            return clazz
+        if (name != null) {
+            if (preservedPackages.any { name.startsWith(it) }) {
+                val loadedClass = classMap[name]?.get()
+                if (loadedClass != null) return loadedClass
+                val clazz = super.loadClass(name, resolve)
+                classMap[name] = WeakReference(clazz)
+                return clazz
+            }
         }
         return super.loadClass(name, resolve)
     }
@@ -69,5 +72,4 @@ class DexLoader(
             extractedFiles
         }
     }
-
 }

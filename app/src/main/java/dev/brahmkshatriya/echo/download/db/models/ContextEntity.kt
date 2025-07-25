@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 import dev.brahmkshatriya.echo.common.models.EchoMediaItem
 import dev.brahmkshatriya.echo.utils.Serializer.toData
 
-@Entity
+@Entity(tableName = "context_entity")
 data class ContextEntity(
     @PrimaryKey(true)
     val id: Long,

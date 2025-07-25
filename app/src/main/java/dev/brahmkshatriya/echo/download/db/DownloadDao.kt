@@ -17,16 +17,16 @@ interface DownloadDao {
     @Insert(onConflict = REPLACE)
     suspend fun insertDownloadEntity(download: DownloadEntity): Long
 
-    @Query("SELECT * FROM DownloadEntity WHERE id = :trackId")
+    @Query("SELECT * FROM download_entity WHERE id = :trackId")
     suspend fun getDownloadEntity(trackId: Long): DownloadEntity?
 
-    @Query("SELECT * FROM ContextEntity WHERE id = :contextId")
+    @Query("SELECT * FROM context_entity WHERE id = :contextId")
     suspend fun getContextEntity(contextId: Long?): ContextEntity?
 
-    @Query("SELECT * FROM DownloadEntity")
+    @Query("SELECT * FROM download_entity")
     fun getDownloadsFlow(): Flow<List<DownloadEntity>>
 
-    @Query("SELECT * FROM ContextEntity")
+    @Query("SELECT * FROM context_entity")
     fun getContextFlow(): Flow<List<ContextEntity>>
 
     @Delete
@@ -35,6 +35,6 @@ interface DownloadDao {
     @Delete
     fun deleteContextEntity(context: ContextEntity)
 
-    @Query("SELECT * FROM DownloadEntity WHERE contextId = :id")
+    @Query("SELECT * FROM download_entity WHERE contextId = :id")
     fun getDownloadsForContext(id: Long?): List<DownloadEntity>
 }
