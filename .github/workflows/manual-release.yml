@@ -25,7 +25,40 @@ jobs:
       repository-projects: write
     
     steps:
-    - name: 📥 Checkout code
+    - name: � Check GitHub Token Permissions
+      run: |
+        echo "🔍 Vérification des permissions du token GitHub..."
+        echo "Repository: ${{ github.repository }}"
+        echo "Actor: ${{ github.actor }}"
+        echo "Event: ${{ github.event_name }}"
+        
+        # Test des permissions avec l'API GitHub
+        echo "📋 Test des permissions disponibles:"
+        
+        # Vérifier les permissions de lecture
+        echo "  ✅ Test lecture repository..."
+        curl -s -H "Authorization: token ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}" \
+             -H "Accept: application/vnd.github.v3+json" \
+             "https://api.github.com/repos/${{ github.repository }}" > /dev/null && \
+        echo "  ✅ Lecture: OK" || echo "  ❌ Lecture: ÉCHEC"
+        
+        # Vérifier les permissions d'écriture (releases)
+        echo "  ✅ Test permissions releases..."
+        curl -s -H "Authorization: token ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}" \
+             -H "Accept: application/vnd.github.v3+json" \
+             "https://api.github.com/repos/${{ github.repository }}/releases" > /dev/null && \
+        echo "  ✅ Releases: OK" || echo "  ❌ Releases: ÉCHEC"
+        
+        # Vérifier le type de token utilisé
+        if [ -n "${{ secrets.PAT_TOKEN }}" ]; then
+          echo "🔑 Utilisation du PAT_TOKEN personnalisé"
+        else
+          echo "🔑 Utilisation du GITHUB_TOKEN par défaut"
+        fi
+        
+        echo "✨ Vérification des permissions terminée"
+
+    - name: �📥 Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
