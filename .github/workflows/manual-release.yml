@@ -80,32 +80,52 @@ jobs:
           echo "✅ Version mise à jour: $LATEST → $CURRENT"
         fi
 
-    - name: ⚙️ Set up JDK 17
+    - name: ⚙️ Setup JDK 17
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
-        distribution: 'temurin'
+        distribution: 'zulu'
+        java-version: 17
+        cache: 'gradle'
+
+    - name: 🔐 Cook KeyStore
+      run: echo "${{ secrets.KEYSTORE_B64 }}" | base64 -d > $GITHUB_WORKSPACE/signing-key.jks
 
     - name: 🔧 Make gradlew executable
       run: chmod +x ./gradlew
 
-    - name: 🚀 Build APK Simple
+    - name: 🚀 Build with Gradle
       run: |
         if [ "${{ github.event.inputs.release_type }}" = "stable" ]; then
           echo "Building stable APK..."
-          ./gradlew assembleStable --no-daemon
+          ./gradlew assembleStable \
+          -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/signing-key.jks \
+          -Pandroid.injected.signing.store.password=${{ secrets.PASSWORD }} \
+          -Pandroid.injected.signing.key.alias=spotify-key \
+          -Pandroid.injected.signing.key.password=${{ secrets.PASSWORD }}
+          cp app/build/outputs/apk/stable/app-stable.apk app/build/v${{ steps.extract_version.outputs.current_version }}.apk
         else
           echo "Building nightly APK..."
-          ./gradlew assembleNightly --no-daemon
+          ./gradlew assembleNightly \
+          -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/signing-key.jks \
+          -Pandroid.injected.signing.store.password=${{ secrets.PASSWORD }} \
+          -Pandroid.injected.signing.key.alias=spotify-key \
+          -Pandroid.injected.signing.key.password=${{ secrets.PASSWORD }}
+          cp app/build/outputs/apk/nightly/app-nightly.apk app/build/v${{ steps.extract_version.outputs.current_version }}.apk
         fi
 
-    - name: 📦 Create GitHub Release
-      uses: softprops/action-gh-release@v1
+    - name: � Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: spotifix-v${{ steps.extract_version.outputs.current_version }}
+        path: app/build/v${{ steps.extract_version.outputs.current_version }}.apk
+
+    - name: �📦 Create GitHub Release
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: v${{ steps.extract_version.outputs.current_version }}
         name: 🚀 Spotifix v${{ steps.extract_version.outputs.current_version }}
-        generate_release_notes: true
         make_latest: ${{ github.event.inputs.release_type == 'stable' }}
+        generate_release_notes: true
         body: |
           ## 🎉 Version ${{ steps.extract_version.outputs.current_version }}
           
@@ -120,8 +140,7 @@ jobs:
           
           ---
           *Release générée automatiquement* 🤖
-        files: |
-          app/build/outputs/apk/**/*.apk
+        files: app/build/v${{ steps.extract_version.outputs.current_version }}.apk
         draft: false
         prerelease: ${{ github.event.inputs.release_type == 'nightly' }}
       env:
