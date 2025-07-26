@@ -10,7 +10,7 @@ plugins {
 
 val gitHash = "abc1234"
 val gitCount = 100
-val version = "1.1.1"
+val version = "1.1.2"
 
 android {
     namespace = "dev.brahmkshatriya.echo"
