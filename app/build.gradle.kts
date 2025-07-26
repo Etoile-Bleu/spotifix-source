@@ -8,8 +8,8 @@ plugins {
     alias(libs.plugins.crashlytics)
 }
 
-val gitHash = "abc1234"
-val gitCount = 100
+val gitHash = execute("git", "rev-parse", "--short", "HEAD")
+val gitCount = execute("git", "rev-list", "--count", "HEAD").toInt()
 val version = "1.1.2"
 
 android {
