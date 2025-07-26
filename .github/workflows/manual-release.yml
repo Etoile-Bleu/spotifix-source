@@ -16,12 +16,17 @@ jobs:
   release:
     name: 🚀 Create Release
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      actions: read
     
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
     
     - name: 🔍 Extract version from build.gradle.kts
       id: extract_version
@@ -62,35 +67,56 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     
-    - name: 🛠️ Setup Gradle
-      uses: gradle/gradle-build-action@v3
+    - name: 🛠️ Setup Gradle with cache
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-home-cache-cleanup: true
+        cache-read-only: false
+    
+    - name: 📦 Cache Android SDK
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.android/sdk
+        key: android-sdk-${{ runner.os }}
     
     - name: 🔧 Make gradlew executable
       run: chmod +x ./gradlew
     
-    - name: 🏗️ Build APK
+    - name: 🚀 Build APK with parallel execution
       run: |
+        # Configuration pour accélérer le build
+        export GRADLE_OPTS="-Xmx4g -XX:+UseParallelGC -XX:MaxMetaspaceSize=1g"
+        
         if [ "${{ github.event.inputs.release_type }}" = "stable" ]; then
-          echo "Building stable APK..."
-          ./gradlew assembleStable
+          echo "Building stable APK with optimizations..."
+          ./gradlew assembleStable \
+            --parallel \
+            --build-cache \
+            --configuration-cache \
+            --daemon \
+            -Dorg.gradle.jvmargs="-Xmx4g -XX:+UseParallelGC" \
+            -Dkotlin.incremental=true \
+            -Dkotlin.compiler.execution.strategy=in-process
         else
-          echo "Building nightly APK..."
-          ./gradlew assembleNightly
+          echo "Building nightly APK with optimizations..."
+          ./gradlew assembleNightly \
+            --parallel \
+            --build-cache \
+            --configuration-cache \
+            --daemon \
+            -Dorg.gradle.jvmargs="-Xmx4g -XX:+UseParallelGC" \
+            -Dkotlin.incremental=true \
+            -Dkotlin.compiler.execution.strategy=in-process
         fi
-    
-    - name: 🏷️ Create and push tag
-      run: |
-        VERSION="${{ steps.extract_version.outputs.current_version }}"
-        git config user.name "GitHub Actions"
-        git config user.email "actions@github.com"
-        git tag "v$VERSION"
-        git push origin "v$VERSION"
     
     - name: 📦 Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
         tag_name: v${{ steps.extract_version.outputs.current_version }}
         name: 🚀 Spotifix v${{ steps.extract_version.outputs.current_version }}
+        generate_release_notes: true
+        make_latest: ${{ github.event.inputs.release_type == 'stable' }}
         body: |
           ## 🎉 Version ${{ steps.extract_version.outputs.current_version }}
           
