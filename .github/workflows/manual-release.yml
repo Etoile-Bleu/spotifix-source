@@ -20,13 +20,17 @@ jobs:
     permissions:
       contents: write
       actions: read
+      pull-requests: write
+      issues: write
+      repository-projects: write
     
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+        persist-credentials: true
     
     - name: 🔍 Extract version from build.gradle.kts
       id: extract_version
@@ -136,4 +140,4 @@ jobs:
         draft: false
         prerelease: ${{ github.event.inputs.release_type == 'nightly' }}
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
