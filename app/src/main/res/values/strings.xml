@@ -386,7 +386,7 @@
     <string name="check_app_updates_summary">Rechercher de nouvelles versions de Spotifix</string>
     <string name="checking_app_updates">Recherche de mises à jour...</string>
     <string name="app_up_to_date">L\'application est à jour !</string>
-    <string name="credit_matheo">Crédit v2</string>
+    <string name="credit_matheo">Crédit v3</string>
     <string name="credit_matheo_summary">Cette marche application a été corrigée et traduite en français par Mathéo Delbarre</string>
     
     <!-- Messages de mise à jour personnalisés -->
