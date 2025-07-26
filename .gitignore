@@ -18,6 +18,9 @@ app/google-services.json
 *.keystore
 *.p12
 *.p8
+
+# Scripts batch locaux
+*.bat
 *.cer
 *.crt
 *.pem
