@@ -1,4 +1,4 @@
-name: 📦 Release Simple
+name: 📦 Release Spotifix
 
 on:
   workflow_dispatch:
