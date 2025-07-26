@@ -10,6 +10,7 @@ import dev.brahmkshatriya.echo.common.models.Message
 import dev.brahmkshatriya.echo.di.App
 import dev.brahmkshatriya.echo.utils.ContextUtils.appVersion
 import dev.brahmkshatriya.echo.utils.ContextUtils.getTempApkFile
+import dev.brahmkshatriya.echo.utils.ExtensionDataManager
 import dev.brahmkshatriya.echo.utils.Serializer.toData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -25,48 +26,64 @@ object AppUpdater {
 
     private val client = OkHttpClient()
 
+    data class UpdateInfo(
+        val version: String,
+        val downloadUrl: String
+    )
+
     @Suppress("KotlinConstantConditions")
-    suspend fun updateApp(app: App): File? {
-        // Check if all updates are disabled
+    suspend fun checkForUpdate(app: App): UpdateInfo? {
         val disableAll = app.settings.getBoolean("disable_all_updates", false)
         if (disableAll) return null
         
         val throwableFlow = app.throwFlow
-        val messageFlow = app.messageFlow
         val githubRepo = app.context.getString(R.string.app_github_repo)
         val appType = BuildConfig.BUILD_TYPE
         val version = appVersion()
 
-        val url = runCatching {
+        return runCatching {
             when (appType) {
-                "stable", "debug" -> {  // Traiter debug comme stable pour les tests
+                "stable", "debug" -> {
                     val currentVersion = version.substringBefore('_')
                     val updateUrl = "https://api.github.com/repos/$githubRepo/releases"
-                    getGithubUpdateUrl(currentVersion, updateUrl, client) ?: return null
+                    val url = getGithubUpdateUrl(currentVersion, updateUrl, client)
+                    if (url != null) {
+                        val latestVersion = getLatestVersionFromGithub(githubRepo, client)
+                        UpdateInfo(latestVersion, url)
+                    } else null
                 }
 
                 "nightly" -> {
                     val hash = version.substringBefore("(").substringAfter('_')
-                    // Pour accéder aux builds depuis un dépôt privé, utiliser un token d'accès
-                    // ou un serveur de distribution externe
-                    val id = getGithubWorkflowId(hash, githubRepo, client) ?: return null
-                    // Option 1: Utiliser un token d'accès GitHub
-                    // "https://api.github.com/repos/$githubRepo/actions/runs/$id/artifacts"
-                    // avec un header Authorization: token YOUR_TOKEN
-                    
-                    // Option 2: Utiliser un service de proxy ou de distribution personnalisé
-                    // "https://votre-serveur-de-distribution.com/nightly/$id.zip"
-                    
-                    // Pour l'instant, on garde le comportement par défaut avec nightly.link
-                    "https://nightly.link/$githubRepo/actions/runs/$id/artifact.zip"
+                    val id = getGithubWorkflowId(hash, githubRepo, client)
+                    if (id != null) {
+                        val url = "https://nightly.link/$githubRepo/actions/runs/$id/artifact.zip"
+                        UpdateInfo("nightly-$id", url)
+                    } else null
                 }
 
-                else -> return null
+                else -> null
             }
         }.getOrElse {
             throwableFlow.emit(it)
-            return null
+            null
         }
+    }
+
+    @Suppress("KotlinConstantConditions")
+    suspend fun updateApp(app: App): File? {
+        val updateInfo = checkForUpdate(app) ?: return null
+        return downloadUpdate(app, updateInfo.downloadUrl)
+    }
+
+    suspend fun downloadUpdate(app: App, downloadUrl: String): File? {
+        val throwableFlow = app.throwFlow
+        val messageFlow = app.messageFlow
+        val appType = BuildConfig.BUILD_TYPE
+
+        // 🔄 Sauvegarde automatique des données d'extensions avant la mise à jour
+        messageFlow.emit(Message("🔄 Sauvegarde des données d'extensions..."))
+        ExtensionDataManager.backupAllExtensionData(app.context)
 
         messageFlow.emit(
             Message(
@@ -74,11 +91,20 @@ object AppUpdater {
             )
         )
         return runCatching {
-            val download = downloadUpdate(app.context, url, client).getOrThrow()
+            val download = downloadUpdate(app.context, downloadUrl, client).getOrThrow()
             if (appType == "stable" || appType == "debug") download else unzipApk(download)
         }.getOrElse {
             throwableFlow.emit(it)
             return null
+        }
+    }
+
+    private suspend fun getLatestVersionFromGithub(githubRepo: String, client: OkHttpClient): String {
+        val url = "https://api.github.com/repos/$githubRepo/releases/latest"
+        val request = Request.Builder().url(url).build()
+        return client.newCall(request).await().use {
+            val responseBody = it.body.string()
+            responseBody.toData<GithubReleaseResponse>().tagName
         }
     }
 
@@ -92,33 +118,19 @@ object AppUpdater {
             ?: throw Exception("Invalid Github URL")
         val url = "https://api.github.com/repos/$user/$repo/releases/latest"
         val request = Request.Builder().url(url).build()
-        Log.d("AppUpdater", "DEBUG: Calling GitHub API: $url")
         val res = runCatching {
             client.newCall(request).await().use {
-                Log.d("AppUpdater", "DEBUG: HTTP Status = ${it.code}")
                 val responseBody = it.body.string()
-                Log.d("AppUpdater", "DEBUG: Response Body length = ${responseBody.length}")
                 
                 if (!it.isSuccessful) {
-                    Log.d("AppUpdater", "DEBUG: Request failed with status ${it.code}")
-                    Log.d("AppUpdater", "DEBUG: Full response body: $responseBody")
                     throw Exception("Request failed: ${it.code} - ${it.message}")
                 }
-                
-                // Parser la réponse comme un objet unique
                 val release = responseBody.toData<GithubReleaseResponse>()
-                Log.d("AppUpdater", "DEBUG: Found release tag: ${release.tagName}")
                 release
             }
         }.getOrElse {
-            Log.d("AppUpdater", "DEBUG: Exception in API call: ${it.message}")
             throw Exception("Failed to fetch latest release", it)
         }
-        
-        // Debug: Afficher les versions comparées
-        Log.d("AppUpdater", "DEBUG: Version actuelle = '$currentVersion'")
-        Log.d("AppUpdater", "DEBUG: Version release = '${res.tagName}'")
-        Log.d("AppUpdater", "DEBUG: Versions différentes ? ${res.tagName != currentVersion}")
         
         if (res.tagName != currentVersion) {
             res.assets.sortedByDescending {

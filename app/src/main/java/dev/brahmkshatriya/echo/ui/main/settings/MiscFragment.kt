@@ -37,8 +37,6 @@ class MiscFragment : BaseSettingsFragment() {
 
     class AboutPreference : PreferenceFragmentCompat() {
         
-        // Les launchers pour l'export/import de bibliothèque ont été supprimés
-
         override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
             super.onViewCreated(view, savedInstanceState)
             configure()
@@ -88,16 +86,10 @@ class MiscFragment : BaseSettingsFragment() {
                 key = "disable_all_updates"
                 layoutResource = R.layout.preference_switch
                 isIconSpaceReserved = false
-                setDefaultValue(true)  // Définir la valeur par défaut à true
+                setDefaultValue(true)
                 setDefaultValue(false)
                 screen.addPreference(this)
             }
-
-            // Suppression des fonctionnalités non utilisées
-            // - auto_sync_likes
-            // - export_library
-            // - import_library
-
             SwitchLongClickPreference(context).apply {
                 title = getString(R.string.check_for_extension_updates)
                 summary = getString(R.string.check_for_extension_updates_summary)
@@ -111,8 +103,6 @@ class MiscFragment : BaseSettingsFragment() {
                     viewModel.update(requireActivity(), true)
                 }
             }
-
-            // Bouton pour vérifier les mises à jour de l'app
             LongClickPreference(context).apply {
                 title = getString(R.string.check_app_updates)
                 summary = getString(R.string.check_app_updates_summary)
@@ -137,9 +127,6 @@ class MiscFragment : BaseSettingsFragment() {
                 screen.addPreference(this)
             }
 
-//            preferenceManager.sharedPreferences?.registerOnSharedPreferenceChangeListener { pref, key ->
-//                if (key == "language") applyLocale(pref)
-//            }
         }
 
         private fun getArch(): String {
@@ -149,7 +136,6 @@ class MiscFragment : BaseSettingsFragment() {
                 ?: "Unknown"
         }
         
-        // Les méthodes d'export/import de la bibliothèque ont été supprimées
     }
 
     companion object {

@@ -97,27 +97,6 @@ class QueueAdapter(
         binding.playlistProgressBar.isVisible = isCurrent && !item.isLoaded
         binding.playlistItem.alpha = if (inactive) 0.5f else 1f
     }
-
-//    class Loader : RecyclerView.Adapter<Loader.ViewHolder>() {
-//        inner class ViewHolder(binding: SkeletonItemQueueBinding) :
-//            RecyclerView.ViewHolder(binding.root)
-//
-//        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-//            val inflater = LayoutInflater.from(parent.context)
-//            val binding = SkeletonItemQueueBinding.inflate(inflater, parent, false)
-//            return ViewHolder(binding)
-//        }
-//
-//        private var loading = false
-//        override fun getItemCount() = if (loading) 1 else 0
-//        override fun onBindViewHolder(holder: ViewHolder, position: Int) {}
-//        fun setLoading(loading: Boolean) {
-//            if (this.loading == loading) return
-//            this.loading = loading
-//            if (loading) notifyItemInserted(0) else notifyItemRemoved(0)
-//        }
-//    }
-
     private var scrollAmount: Int = 0
     private val scrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {

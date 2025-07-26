@@ -26,7 +26,6 @@ object AppUpdater {
 
     @Suppress("KotlinConstantConditions")
     suspend fun updateApp(app: App): File? {
-        // Check if all updates are disabled
         val disableAll = app.settings.getBoolean("disable_all_updates", false)
         if (disableAll) return null
         
@@ -36,14 +35,9 @@ object AppUpdater {
         val appType = BuildConfig.BUILD_TYPE
         val version = appVersion()
 
-        // Debug: Afficher toutes les variables importantes
-        println("DEBUG: githubRepo = '$githubRepo'")
-        println("DEBUG: appType = '$appType'")
-        println("DEBUG: version = '$version'")
-
         val url = runCatching {
             when (appType) {
-                "stable", "debug" -> {  // Traiter debug comme stable pour les tests
+                "stable", "debug" -> {
                     val currentVersion = version.substringBefore('_')
                     val updateUrl = "https://api.github.com/repos/$githubRepo/releases"
                     getGithubUpdateUrl(currentVersion, updateUrl, client) ?: return null
@@ -51,17 +45,7 @@ object AppUpdater {
 
                 "nightly" -> {
                     val hash = version.substringBefore("(").substringAfter('_')
-                    // Pour accéder aux builds depuis un dépôt privé, utiliser un token d'accès
-                    // ou un serveur de distribution externe
                     val id = getGithubWorkflowId(hash, githubRepo, client) ?: return null
-                    // Option 1: Utiliser un token d'accès GitHub
-                    // "https://api.github.com/repos/$githubRepo/actions/runs/$id/artifacts"
-                    // avec un header Authorization: token YOUR_TOKEN
-                    
-                    // Option 2: Utiliser un service de proxy ou de distribution personnalisé
-                    // "https://votre-serveur-de-distribution.com/nightly/$id.zip"
-                    
-                    // Pour l'instant, on garde le comportement par défaut avec nightly.link
                     "https://nightly.link/$githubRepo/actions/runs/$id/artifact.zip"
                 }
 
@@ -96,19 +80,10 @@ object AppUpdater {
             ?: throw Exception("Invalid Github URL")
         val url = "https://api.github.com/repos/$user/$repo/releases/latest"
         
-        // Debug: Afficher l'URL construite
-        println("DEBUG: currentVersion = '$currentVersion'")
-        println("DEBUG: updateUrl = '$updateUrl'")
-        println("DEBUG: user = '$user', repo = '$repo'")
-        println("DEBUG: Constructed URL = '$url'")
-        
         val request = Request.Builder().url(url).build()
         val res = runCatching {
             client.newCall(request).await().use {
                 val responseBody = it.body.string()
-                println("DEBUG: HTTP Status = ${it.code}")
-                println("DEBUG: Response URL = ${it.request.url}")
-                println("DEBUG: Response Body = $responseBody")
                 responseBody.toData<GithubReleaseResponse>()
             }
         }.getOrElse {

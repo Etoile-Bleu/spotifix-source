@@ -23,7 +23,9 @@ import dev.brahmkshatriya.echo.extensions.InstallationUtils.uninstallApp
 import dev.brahmkshatriya.echo.extensions.InstallationUtils.uninstallFile
 import dev.brahmkshatriya.echo.extensions.db.models.ExtensionEntity
 import dev.brahmkshatriya.echo.ui.extensions.ExtensionInstallerBottomSheet.Companion.createLinksDialog
+import dev.brahmkshatriya.echo.ui.dialogs.UpdateAvailableDialog
 import dev.brahmkshatriya.echo.ui.extensions.list.ExtensionListViewModel
+import dev.brahmkshatriya.echo.utils.AppUpdater.checkForUpdate
 import dev.brahmkshatriya.echo.utils.AppUpdater.downloadUpdate
 import dev.brahmkshatriya.echo.utils.AppUpdater.getUpdateFileUrl
 import dev.brahmkshatriya.echo.utils.AppUpdater.updateApp
@@ -31,6 +33,7 @@ import dev.brahmkshatriya.echo.utils.CacheUtils.getFromCache
 import dev.brahmkshatriya.echo.utils.CacheUtils.saveToCache
 import dev.brahmkshatriya.echo.utils.ContextUtils.cleanupTempApks
 import dev.brahmkshatriya.echo.utils.ContextUtils.collect
+import dev.brahmkshatriya.echo.utils.ExtensionDataManager
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -50,6 +53,7 @@ class ExtensionsViewModel(
     override val currentSelectionFlow = extensionLoader.current
     override fun onExtensionSelected(extension: MusicExtension) {
         extensionLoader.setupMusicExtension(extension, true)
+        backupExtensionDataSilently()
     }
 
     fun onSettingsChanged(extension: Extension<*>, settings: Settings, key: String?) {
@@ -57,6 +61,7 @@ class ExtensionsViewModel(
             extension.get<SettingsChangeListenerClient, Unit>(app.throwFlow) {
                 onSettingsChanged(settings, key)
             }
+            backupExtensionDataSilently()
         }
     }
 
@@ -105,27 +110,69 @@ class ExtensionsViewModel(
         app.messageFlow.emit(Message(msg))
     }
 
+    private fun backupExtensionDataSilently() {
+        viewModelScope.launch {
+            try {
+                ExtensionDataManager.backupAllExtensionData(app.context)
+            } catch (e: Exception) {
+            }
+        }
+    }
+
     fun update(activity: FragmentActivity, force: Boolean) = viewModelScope.launch {
         if (!force && !shouldCheckForExtensionUpdates()) return@launch
         activity.saveToCache("last_update_check", System.currentTimeMillis())
         activity.cleanupTempApks()
         message(app.context.getString(R.string.checking_for_extension_updates))
-        val appApk = updateApp(app)
+        val updateInfo = checkForUpdate(app)
         runCatching {
-            if (appApk != null) {
-                activity.saveToCache("last_update_check", 0)
-                awaitInstallation(appApk).getOrThrow()
+            if (updateInfo != null) {
+                activity.runOnUiThread {
+                    val dialog = UpdateAvailableDialog(
+                        context = activity,
+                        version = updateInfo.version,
+                        onInstallClick = {
+                            viewModelScope.launch {
+                                val appApk = downloadUpdate(app, updateInfo.downloadUrl)
+                                if (appApk != null) {
+                                    activity.saveToCache("last_update_check", 0)
+                                    awaitInstallation(appApk).getOrThrow()
+                                }
+                            }
+                        },
+                        onCancelClick = {
+                            viewModelScope.launch {
+                                extensionLoader.all.value.forEach { updateExt(it) }
+                            }
+                        }
+                    )
+                    dialog.show()
+                }
             } else extensionLoader.all.value.forEach { updateExt(it) }
         }.getOrElse { app.throwFlow.emit(it) }
     }
-
-    // Fonction pour vérifier manuellement les mises à jour de l'app
     suspend fun checkAppUpdate(activity: FragmentActivity) {
         message(app.context.getString(R.string.checking_app_updates))
-        val appApk = updateApp(app)
-        if (appApk != null) {
-            activity.saveToCache("last_update_check", 0)
-            awaitInstallation(appApk).getOrThrow()
+        val updateInfo = checkForUpdate(app)
+        if (updateInfo != null) {
+            activity.runOnUiThread {
+                val dialog = UpdateAvailableDialog(
+                    context = activity,
+                    version = updateInfo.version,
+                    onInstallClick = {
+                        viewModelScope.launch {
+                            val appApk = downloadUpdate(app, updateInfo.downloadUrl)
+                            if (appApk != null) {
+                                activity.saveToCache("last_update_check", 0)
+                                awaitInstallation(appApk).getOrThrow()
+                            }
+                        }
+                    },
+                    onCancelClick = {
+                    }
+                )
+                dialog.show()
+            }
         } else {
             message(app.context.getString(R.string.app_up_to_date))
         }
@@ -146,8 +193,13 @@ class ExtensionsViewModel(
     val linksDialogFlow = MutableSharedFlow<Pair<File, List<String>>>()
 
     private suspend fun install(id: String, type: ImportType, file: File): Result<Unit> {
-        return if (type == ImportType.App) awaitInstallation(file)
+        val result = if (type == ImportType.App) awaitInstallation(file)
         else runCatching { installFile(app.context, extensionLoader.fileIgnoreFlow, id, file) }
+        if (result.isSuccess && type != ImportType.App) {
+            backupExtensionDataSilently()
+        }
+        
+        return result
     }
 
     private suspend fun awaitInstallation(file: File): Result<Unit> {

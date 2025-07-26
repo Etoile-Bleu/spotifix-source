@@ -149,8 +149,6 @@ class SearchFragment : Fragment() {
         observe(viewModel.quickFeed) {
             quickSearchAdapter.submitList(it)
         }
-
-        // Need to hide scrim because some weird shit happens when we use Material Transition
         binding.quickSearchView
             .findViewById<View>(com.google.android.material.R.id.open_search_view_scrim).run {
                 setBackgroundColor(Color.TRANSPARENT)

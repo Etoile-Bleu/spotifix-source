@@ -20,7 +20,10 @@ import dev.brahmkshatriya.echo.di.DI
 import dev.brahmkshatriya.echo.extensions.ExtensionLoader
 import dev.brahmkshatriya.echo.utils.AppShortcuts.configureAppShortcuts
 import dev.brahmkshatriya.echo.utils.CoroutineUtils
+import dev.brahmkshatriya.echo.utils.ExtensionDataManager
 import androidx.preference.PreferenceManager
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.koin.workManagerFactory
@@ -36,32 +39,36 @@ class MainApplication : Application(), KoinStartup, SingletonImageLoader.Factory
         modules(DI.appModule)
         workManagerFactory()
     }
-
-//    private val settings by inject<SharedPreferences>()
     private val extensionLoader by inject<ExtensionLoader>()
 
     override fun onCreate() {
         super.onCreate()
         CoroutineUtils.setDebug()
-        
-        // Définir les préférences par défaut
         setDefaultPreferences()
-        
-//        applyLocale(settings)
+        restoreExtensionDataIfNeeded()
         configureAppShortcuts(extensionLoader)
     }
-    
     private fun setDefaultPreferences() {
-        // Utilise le nom de préférences défini dans ContextUtils.SETTINGS_NAME
         val preferences = getSharedPreferences("settings", Context.MODE_PRIVATE)
-        
-        // Vérifie si c'est le premier démarrage en cherchant si la clé "first_run" existe
         if (!preferences.contains("first_run")) {
-            // Définir disable_all_updates à true par défaut
             preferences.edit().apply {
                 putBoolean("disable_all_updates", true)
-                putBoolean("first_run", false)  // Marque que l'application a été lancée
+                putBoolean("first_run", false)
                 apply()
+            }
+        }
+    }
+
+    private fun restoreExtensionDataIfNeeded() {
+        GlobalScope.launch {
+            try {
+                if (ExtensionDataManager.hasRecentBackup(this@MainApplication)) {
+                    ExtensionDataManager.restoreAllExtensionData(this@MainApplication)
+                }
+                ExtensionDataManager.startPeriodicBackup(this@MainApplication)
+                
+            } catch (e: Exception) {
+                println("⚠️ Erreur lors de la restauration automatique: ${e.message}")
             }
         }
     }
@@ -94,6 +101,17 @@ class MainApplication : Application(), KoinStartup, SingletonImageLoader.Factory
             if (isChromiumCall) return spoofedPackageName(applicationContext)
         }
         return super.getPackageName()
+    }
+
+    override fun onTerminate() {
+        super.onTerminate()
+        GlobalScope.launch {
+            try {
+                ExtensionDataManager.stopPeriodicBackup()
+                ExtensionDataManager.backupAllExtensionData(this@MainApplication)
+            } catch (e: Exception) {
+            }
+        }
     }
 
     private fun spoofedPackageName(context: Context): String {
