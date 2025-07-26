@@ -382,13 +382,17 @@
     <string name="no_update_available_for_x">Aucune mise à jour disponible pour %1$s</string>
     <string name="other">Autre</string>
     <string name="accounts">Comptes</string>
+    <string name="check_app_updates">Vérifier les mises à jour</string>
+    <string name="check_app_updates_summary">Rechercher de nouvelles versions de Spotifix</string>
+    <string name="checking_app_updates">Recherche de mises à jour...</string>
+    <string name="app_up_to_date">L\'application est à jour !</string>
     <string name="credit_matheo">Crédit</string>
     <string name="credit_matheo_summary">Cette marche application a été corrigée et traduite en français par Mathéo Delbarre</string>
     
     <!-- Messages de mise à jour personnalisés -->
-    <string name="matheo_update_available">🎉 Mathéo Delbarre a publié une nouvelle mise à jour !</string>
+    <string name="matheo_update_available">Mathéo Delbarre a publié une nouvelle mise à jour !</string>
     <string name="matheo_update_message">Une nouvelle version de Spotifix est disponible. Voulez-vous l\'installer maintenant ?</string>
-    <string name="matheo_downloading_update">📥 Téléchargement de la mise à jour de Mathéo...</string>
+    <string name="matheo_downloading_update">Téléchargement de la mise à jour de Mathéo...</string>
     <string name="install_update">Installer la mise à jour</string>
     <string name="update_later">Plus tard</string>
 

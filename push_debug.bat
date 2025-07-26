@@ -40,4 +40,8 @@ echo.
 echo ✅ Installation reussie!
 echo L'application debug a ete installee sur votre device.
 echo.
-pause
+echo [3/3] Surveillance des logs pour debug...
+echo Ouvrez l'app et cliquez sur 'Verifier les mises a jour'
+echo Appuyez sur Ctrl+C pour arreter les logs
+echo.
+E:\ANDROID_SDK\platform-tools\adb.exe logcat AppUpdater:D *:S

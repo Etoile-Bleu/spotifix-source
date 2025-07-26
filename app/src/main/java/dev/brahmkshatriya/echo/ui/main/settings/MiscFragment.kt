@@ -112,6 +112,22 @@ class MiscFragment : BaseSettingsFragment() {
                 }
             }
 
+            // Bouton pour vérifier les mises à jour de l'app
+            LongClickPreference(context).apply {
+                title = getString(R.string.check_app_updates)
+                summary = getString(R.string.check_app_updates_summary)
+                layoutResource = R.layout.preference
+                isIconSpaceReserved = false
+                screen.addPreference(this)
+                setOnPreferenceClickListener {
+                    val viewModel by activityViewModel<ExtensionsViewModel>()
+                    lifecycleScope.launch {
+                        viewModel.checkAppUpdate(requireActivity())
+                    }
+                    true
+                }
+            }
+
             LongClickPreference(context).apply {
                 title = getString(R.string.credit_matheo)
                 summary = getString(R.string.credit_matheo_summary)

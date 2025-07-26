@@ -2,7 +2,6 @@ package dev.brahmkshatriya.echo.utils
 
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import dev.brahmkshatriya.echo.BuildConfig
 import dev.brahmkshatriya.echo.R
 import dev.brahmkshatriya.echo.common.helpers.ContinuationCallback.Companion.await
@@ -36,6 +35,11 @@ object AppUpdater {
         val githubRepo = app.context.getString(R.string.app_github_repo)
         val appType = BuildConfig.BUILD_TYPE
         val version = appVersion()
+
+        // Debug: Afficher toutes les variables importantes
+        println("DEBUG: githubRepo = '$githubRepo'")
+        println("DEBUG: appType = '$appType'")
+        println("DEBUG: version = '$version'")
 
         val url = runCatching {
             when (appType) {
@@ -75,7 +79,7 @@ object AppUpdater {
         )
         return runCatching {
             val download = downloadUpdate(app.context, url, client).getOrThrow()
-            if (appType == "stable" || appType == "debug") download else unzipApk(download)
+            if (appType == "stable") download else unzipApk(download)
         }.getOrElse {
             throwableFlow.emit(it)
             return null
@@ -91,35 +95,25 @@ object AppUpdater {
         val (user, repo) = githubRegex.find(updateUrl)?.destructured
             ?: throw Exception("Invalid Github URL")
         val url = "https://api.github.com/repos/$user/$repo/releases/latest"
+        
+        // Debug: Afficher l'URL construite
+        println("DEBUG: currentVersion = '$currentVersion'")
+        println("DEBUG: updateUrl = '$updateUrl'")
+        println("DEBUG: user = '$user', repo = '$repo'")
+        println("DEBUG: Constructed URL = '$url'")
+        
         val request = Request.Builder().url(url).build()
-        Log.d("AppUpdater", "DEBUG: Calling GitHub API: $url")
         val res = runCatching {
             client.newCall(request).await().use {
-                Log.d("AppUpdater", "DEBUG: HTTP Status = ${it.code}")
                 val responseBody = it.body.string()
-                Log.d("AppUpdater", "DEBUG: Response Body length = ${responseBody.length}")
-                
-                if (!it.isSuccessful) {
-                    Log.d("AppUpdater", "DEBUG: Request failed with status ${it.code}")
-                    Log.d("AppUpdater", "DEBUG: Full response body: $responseBody")
-                    throw Exception("Request failed: ${it.code} - ${it.message}")
-                }
-                
-                // Parser la réponse comme un objet unique
-                val release = responseBody.toData<GithubReleaseResponse>()
-                Log.d("AppUpdater", "DEBUG: Found release tag: ${release.tagName}")
-                release
+                println("DEBUG: HTTP Status = ${it.code}")
+                println("DEBUG: Response URL = ${it.request.url}")
+                println("DEBUG: Response Body = $responseBody")
+                responseBody.toData<GithubReleaseResponse>()
             }
         }.getOrElse {
-            Log.d("AppUpdater", "DEBUG: Exception in API call: ${it.message}")
             throw Exception("Failed to fetch latest release", it)
         }
-        
-        // Debug: Afficher les versions comparées
-        Log.d("AppUpdater", "DEBUG: Version actuelle = '$currentVersion'")
-        Log.d("AppUpdater", "DEBUG: Version release = '${res.tagName}'")
-        Log.d("AppUpdater", "DEBUG: Versions différentes ? ${res.tagName != currentVersion}")
-        
         if (res.tagName != currentVersion) {
             res.assets.sortedByDescending {
                 it.name.contains(Build.SUPPORTED_ABIS.first())

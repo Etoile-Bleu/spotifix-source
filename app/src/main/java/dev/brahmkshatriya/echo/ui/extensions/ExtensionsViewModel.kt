@@ -119,6 +119,18 @@ class ExtensionsViewModel(
         }.getOrElse { app.throwFlow.emit(it) }
     }
 
+    // Fonction pour vérifier manuellement les mises à jour de l'app
+    suspend fun checkAppUpdate(activity: FragmentActivity) {
+        message(app.context.getString(R.string.checking_app_updates))
+        val appApk = updateApp(app)
+        if (appApk != null) {
+            activity.saveToCache("last_update_check", 0)
+            awaitInstallation(appApk).getOrThrow()
+        } else {
+            message(app.context.getString(R.string.app_up_to_date))
+        }
+    }
+
     data class PromptResult(
         val file: File,
         val accepted: Boolean,
